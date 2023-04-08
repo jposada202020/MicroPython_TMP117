@@ -10,6 +10,12 @@ MicroPython Driver for the TMP117 temperature sensor
 
 * Author(s): Jose D. Montoya
 
+Implementation Notes
+--------------------
+
+**Software and Dependencies:**
+
+This library depends on Micropython
 
 """
 
