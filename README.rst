@@ -2,8 +2,8 @@ Introduction
 ============
 
 
-.. image:: https://readthedocs.org/projects/micropython-tmp117/badge/?version=latest
-    :target: https://micropython-tmp117.readthedocs.io/
+.. image:: https://readthedocs.org/projects/tmp117/badge/?version=latest
+    :target: https://tmp117.readthedocs.io/
     :alt: Documentation Status
 
 
