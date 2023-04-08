@@ -13,10 +13,11 @@ MicroPython Driver for the TMP117 temperature sensor
 
 """
 
-# pylint: disable=unused-argument
+# pylint: disable=unused-argument, too-many-arguments
 
 import time
 from micropython import const
+
 try:
     import struct
 except ImportError:
@@ -42,8 +43,14 @@ class CBits:
     Changes bits from a byte register
     """
 
-    def __init__(self, num_bits: int, register_address: int, start_bit: int, register_width=1,
-                 lsb_first=True, ) -> None:
+    def __init__(
+        self,
+        num_bits: int,
+        register_address: int,
+        start_bit: int,
+        register_width=1,
+        lsb_first=True,
+    ) -> None:
         self.bit_mask = ((1 << num_bits) - 1) << start_bit
         self.register = register_address
         self.star_bit = start_bit
@@ -51,19 +58,19 @@ class CBits:
         self.lsb_first = lsb_first
 
     def __get__(
-            self,
-            obj,
-            objtype=None,
+        self,
+        obj,
+        objtype=None,
     ) -> int:
 
-        a = obj._i2c.readfrom_mem(obj._address, self.register, self.lenght)
+        mem_value = obj._i2c.readfrom_mem(obj._address, self.register, self.lenght)
 
         reg = 0
-        order = range(len(a) - 1, -1, -1)
+        order = range(len(mem_value) - 1, -1, -1)
         if not self.lsb_first:
             order = reversed(order)
         for i in order:
-            reg = (reg << 8) | a[i]
+            reg = (reg << 8) | mem_value[i]
 
         reg = (reg & self.bit_mask) >> self.star_bit
 
@@ -99,17 +106,25 @@ class RegisterStruct:
         self.lenght = struct.calcsize(form)
 
     def __get__(
-            self,
-            obj,
-            objtype=None,
+        self,
+        obj,
+        objtype=None,
     ):
 
         if self.lenght <= 2:
-            value = \
-            struct.unpack(self.format, memoryview(obj._i2c.readfrom_mem(obj._address, self.register, self.lenght)), )[0]
+            value = struct.unpack(
+                self.format,
+                memoryview(
+                    obj._i2c.readfrom_mem(obj._address, self.register, self.lenght)
+                ),
+            )[0]
         else:
-            value = struct.unpack(self.format,
-                                  memoryview(obj._i2c.readfrom_mem(obj._address, self.register, self.lenght)), )
+            value = struct.unpack(
+                self.format,
+                memoryview(
+                    obj._i2c.readfrom_mem(obj._address, self.register, self.lenght)
+                ),
+            )
         return value
 
     def __set__(self, obj, value):
@@ -136,7 +151,7 @@ class TMP117:
         from machine import Pin, I2C
         import tmp117
 
-    Once this is done you can define your `I2C` object and define your sensor object
+    Once this is done you can define your `machine.I2C` object and define your sensor object
 
     .. code-block:: python
 
@@ -185,5 +200,3 @@ class TMP117:
         """The current measured temperature in Celsius"""
 
         return self._read_temperature()
-
-

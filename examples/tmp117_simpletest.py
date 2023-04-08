@@ -12,4 +12,3 @@ for _ in range(3):
     print("Temperature: ", temp)
     print("----------")
     time.sleep(1)
-

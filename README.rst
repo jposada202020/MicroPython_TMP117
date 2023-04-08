@@ -13,6 +13,9 @@ Introduction
 
 MicroPython Driver for the TMP117 temperature sensor
 
+Register reding based on
+https://github.com/adafruit/Adafruit_CircuitPython_Register
+
 
 On supported GNU/Linux systems like the Raspberry Pi, you can install the driver locally `from
 PyPI <https://pypi.org/project/micropython-tmp117/>`_.
@@ -36,5 +39,3 @@ To install in a virtual environment in your current project:
     python3 -m venv .venv
     source .env/bin/activate
     pip3 install micropython-tmp117
-
-
