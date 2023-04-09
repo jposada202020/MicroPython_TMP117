@@ -31,7 +31,8 @@ except ImportError:
 
 
 __version__ = "0.0.0+auto.0"
-__repo__ = "https://github.com/jposada202020/micropython_TMP117.git"
+__repo__ = "https://github.com/jposada202020/TMP117.git"
+
 
 _REG_WHOAMI = const(0x0F)
 _TEMP_RESULT = const(0x00)
@@ -183,6 +184,14 @@ class TMP117:
     _data_ready = CBits(1, _CONFIGURATION, 13, 2, False)
     _mode = CBits(2, _CONFIGURATION, 10, 2, False)
     _soft_reset = CBits(1, _CONFIGURATION, 1, 2, False)
+    _conversion_averaging_mode = CBits(2, _CONFIGURATION, 5, 2, False)
+    _conversion_cycle_bit = CBits(3, _CONFIGURATION, 7, 2, False)
+
+    _avg_3 = {0: 1, 1: 1, 2: 1, 3: 1, 4: 1, 5: 4, 6: 8, 7: 16}
+    _avg_2 = {0: 0.5, 1: 0.5, 2: 0.5, 3: 0.5, 4: 1, 5: 4, 6: 8, 7: 16}
+    _avg_1 = {0: 0.125, 1: 0.125, 2: 0.25, 3: 0.5, 4: 1, 5: 4, 6: 8, 7: 16}
+    _avg_0 = {0: 0.0155, 1: 0.125, 2: 0.25, 3: 0.5, 4: 1, 5: 4, 6: 8, 7: 16}
+    _averaging_modes = {0: _avg_0, 1: _avg_1, 2: _avg_2, 3: _avg_3}
 
     def __init__(self, i2c, address=0x48):
         self._i2c = i2c
@@ -197,6 +206,12 @@ class TMP117:
         while not self._data_ready:
             time.sleep(0.001)
         self._read_temperature()
+        # Some calculation to sleep according to the datasheet
+        time.sleep(
+            self._averaging_modes[self._conversion_averaging_mode][
+                self._conversion_cycle_bit
+            ]
+        )
 
     def _read_temperature(self):
         return self._raw_temperature * _TMP117_RESOLUTION
