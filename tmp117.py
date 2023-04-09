@@ -22,7 +22,9 @@ This library depends on Micropython
 # pylint: disable=unused-argument, too-many-arguments
 
 import time
+from collections import namedtuple
 from micropython import const
+
 
 try:
     import struct
@@ -37,12 +39,19 @@ __repo__ = "https://github.com/jposada202020/TMP117.git"
 _REG_WHOAMI = const(0x0F)
 _TEMP_RESULT = const(0x00)
 _CONFIGURATION = const(0x01)
+_TEMP_HIGH_LIMIT = const(0x02)
+_TEMP_LOW_LIMIT = const(0x03)
+_TEMP_OFFSET = const(0x07)
 
 _CONTINUOUS_CONVERSION_MODE = const(0b00)  # Continuous Conversion Mode
 _ONE_SHOT_MODE = const(0b11)  # One Shot Conversion Mode
 _SHUTDOWN_MODE = const(0b01)  # Shutdown Conversion Mode
 
 _TMP117_RESOLUTION = const(0.0078125)
+
+AlertStatus = namedtuple("AlertStatus", ["high_alert", "low_alert"])
+ALERT_WINDOW = const(0)
+ALERT_HYSTERESIS = const(1)
 
 
 class CBits:
@@ -135,8 +144,8 @@ class RegisterStruct:
         return value
 
     def __set__(self, obj, value):
-
-        obj._i2c.writeto_mem(obj._address, self.register, bytes([value]))
+        mem_value = value.to_bytes(self.lenght, "big")
+        obj._i2c.writeto_mem(obj._address, self.register, mem_value)
 
 
 class TMP117:
@@ -176,16 +185,22 @@ class TMP117:
     _device_id = RegisterStruct(_REG_WHOAMI, ">H")
     _configuration = RegisterStruct(_CONFIGURATION, ">H")
     _raw_temperature = RegisterStruct(_TEMP_RESULT, ">h")
+    _raw_temperature_offset = RegisterStruct(_TEMP_OFFSET, ">h")
+    _raw_high_limit = RegisterStruct(_TEMP_HIGH_LIMIT, ">h")
+    _raw_low_limit = RegisterStruct(_TEMP_LOW_LIMIT, ">h")
 
     # Register 0x01
     # HIGH_Alert|LOW_Alert|Data_Ready|EEPROM_Busy| MOD1(2) |   MOD0(1)    | CONV2(1) |CONV1(1)
     # ----------------------------------------------------------------------------------------
     # CONV0(1)  | AVG1(1) |AVG0(1)   |T/nA(1)    |POL(1)   |DR/Alert(1)   |Soft_Reset|   —
+    _high_alert = CBits(1, _CONFIGURATION, 15, 2, False)
+    _low_alert = CBits(1, _CONFIGURATION, 14, 2, False)
     _data_ready = CBits(1, _CONFIGURATION, 13, 2, False)
     _mode = CBits(2, _CONFIGURATION, 10, 2, False)
     _soft_reset = CBits(1, _CONFIGURATION, 1, 2, False)
     _conversion_averaging_mode = CBits(2, _CONFIGURATION, 5, 2, False)
     _conversion_cycle_bit = CBits(3, _CONFIGURATION, 7, 2, False)
+    _raw_alert_mode = CBits(1, _CONFIGURATION, 4, 2, False)
 
     _avg_3 = {0: 1, 1: 1, 2: 1, 3: 1, 4: 1, 5: 4, 6: 8, 7: 16}
     _avg_2 = {0: 0.5, 1: 0.5, 2: 0.5, 3: 0.5, 4: 1, 5: 4, 6: 8, 7: 16}
@@ -196,6 +211,7 @@ class TMP117:
     def __init__(self, i2c, address=0x48):
         self._i2c = i2c
         self._address = address
+        self._valide_range = range(-256, 255)
 
         if self._device_id != 0x117:
             raise RuntimeError("Failed to find TMP117!")
@@ -221,3 +237,131 @@ class TMP117:
         """The current measured temperature in Celsius"""
 
         return self._read_temperature()
+
+    @property
+    def temperature_offset(self):
+        """User defined temperature offset to be added to measurements from `temperature`.
+        In order the see the new change in the temperature we need for the data to be ready.
+        There is a time delay calculated according to current configuration.
+
+        .. code-block::python
+
+            import time
+            from machine import Pin, I2C
+            import tmp117
+
+            i2c = I2C(sda=Pin(8), scl=Pin(9))  # Correct I2C pins for UM FeatherS2
+            tmp = tmp117.TMP117(i2c)
+
+            print("Temperature without offset: ", tmp.temperature)
+            tmp117.temperature_offset = 10.0
+            print("Temperature with offset: ", tmp.temperature)
+
+        """
+        return self._raw_temperature_offset * _TMP117_RESOLUTION
+
+    @temperature_offset.setter
+    def temperature_offset(self, value: float):
+
+        self._raw_temperature_offset = self.validate_value(value)
+        time.sleep(
+            self._averaging_modes[self._conversion_averaging_mode][
+                self._conversion_cycle_bit
+            ]
+        )
+
+    @property
+    def high_limit(self):
+        """The high temperature limit in Celsius. When the measured temperature exceeds this
+        value, the `high_alert` attribute of the `alert_status` property will be True."""
+
+        return self._raw_high_limit * _TMP117_RESOLUTION
+
+    @high_limit.setter
+    def high_limit(self, value: float):
+        self._raw_high_limit = self.validate_value(value)
+
+    @property
+    def low_limit(self):
+        """The low  temperature limit in Celsius. When the measured temperature goes below
+        this value, the `low_alert` attribute of the `alert_status` property will be True."""
+
+        return self._raw_low_limit * _TMP117_RESOLUTION
+
+    @low_limit.setter
+    def low_limit(self, value: float):
+        self._raw_low_limit = self.validate_value(value)
+
+    def validate_value(self, value):
+        """Validates for values to be in the range of :const:`-256` and :const:`255`,
+        then return the value divided by the :const:`_TMP117_RESOLUTION`
+        """
+        if value not in self._valide_range:
+            raise ValueError("Value should be within -256 and 255")
+        return int(value / _TMP117_RESOLUTION)
+
+    @property
+    def alert_status(self):
+        """The current triggered status of the high and low temperature alerts as a AlertStatus
+        named tuple with attributes for the triggered status of each alert.
+
+        .. code-block :: python
+
+            import time
+            from machine import Pin, I2C
+            import tmp117
+
+            i2c = I2C(sda=Pin(8), scl=Pin(9))  # Correct I2C pins for UM FeatherS2
+            tmp = tmp117.TMP117(i2c)
+
+            tmp.low_limit = 20
+            tmp.high_limit = 23
+
+            print("Alert mode:", tmp.alert_mode)
+            print("High limit", tmp.high_limit)
+            print("Low limit", tmp.low_limit)
+
+
+            while True:
+                print("Temperature: %.2f degrees C" % tmp.temperature)
+                alert_status = tmp.alert_status
+                if alert_status.high_alert:
+                    print("Temperature above high set limit!")
+                if alert_status.low_alert:
+                    print("Temperature below low set limit!")
+                print("Low alert:", alert_status.low_alert)
+                time.sleep(1)
+
+        """
+
+        return AlertStatus(high_alert=self._high_alert, low_alert=self._low_alert)
+
+    @property
+    def alert_mode(self):
+        """Sets the behavior of the `low_limit`, `high_limit`, and `alert_status` properties.
+
+        When set to :py:const:`ALERT_WINDOW`, the `high_limit` property will unset when the
+        measured temperature goes below `high_limit`. Similarly `low_limit` will be True or False
+        depending on if the measured temperature is below (`False`) or above(`True`) `low_limit`.
+
+        When set to :py:const:`ALERT_HYSTERESIS`, the `high_limit` property will be set to
+        `False` when the measured temperature goes below `low_limit`. In this mode, the `low_limit`
+        property of `alert_status` will not be set.
+
+        The default is :py:const:`ALERT_WINDOW`"""
+
+        return self._raw_alert_mode
+
+    @alert_mode.setter
+    def alert_mode(self, value):
+        """The alert_mode of the sensor
+
+        Could have the following values:
+
+        * ALERT_WINDOW
+        * ALERT_HYSTERESIS
+
+        """
+        if value not in [0, 1]:
+            raise ValueError("alert_mode must be an 0 or 1")
+        self._raw_alert_mode = value
