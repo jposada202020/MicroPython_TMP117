@@ -13,7 +13,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - name: Run PyPI Release CI workflow
-      uses: adafruit/workflows-micropython-libs/release-pypi@main
+      uses: adafruit/workflows-circuitpython-libs/release-pypi@main
       with:
         pypi-username: ${{ secrets.pypi_username }}
         pypi-password: ${{ secrets.pypi_password }}
