@@ -201,17 +201,17 @@ class TMP117:
             raise RuntimeError("Failed to find TMP117!")
 
         self._reset = True
-
-        self._mode = _CONTINUOUS_CONVERSION_MODE
-        while not self._data_ready:
-            time.sleep(0.001)
-        self._read_temperature()
-        # Some calculation to sleep according to the datasheet
+        # Following a reset, the temperature register reads –256 °C until the first
+        # conversion, including averaging, is complete. So we sleep for that amount of time
         time.sleep(
             self._averaging_modes[self._conversion_averaging_mode][
                 self._conversion_cycle_bit
             ]
         )
+        self._mode = _CONTINUOUS_CONVERSION_MODE
+        while not self._data_ready:
+            time.sleep(0.001)
+        self._read_temperature()
 
     def _read_temperature(self):
         return self._raw_temperature * _TMP117_RESOLUTION
