@@ -19,7 +19,7 @@ This library depends on Micropython
 
 """
 
-# pylint: disable=unused-argument, too-many-arguments
+# pylint: disable=unused-argument, too-many-arguments, line-too-long
 
 import time
 from collections import namedtuple
@@ -43,15 +43,21 @@ _TEMP_HIGH_LIMIT = const(0x02)
 _TEMP_LOW_LIMIT = const(0x03)
 _TEMP_OFFSET = const(0x07)
 
-_CONTINUOUS_CONVERSION_MODE = const(0b00)  # Continuous Conversion Mode
-_ONE_SHOT_MODE = const(0b11)  # One Shot Conversion Mode
-_SHUTDOWN_MODE = const(0b01)  # Shutdown Conversion Mode
+CONTINUOUS_CONVERSION_MODE = const(0b00)  # Continuous Conversion Mode
+ONE_SHOT_MODE = const(0b11)  # One Shot Conversion Mode
+SHUTDOWN_MODE = const(0b01)  # Shutdown Conversion Mode
 
 _TMP117_RESOLUTION = const(0.0078125)
 
 AlertStatus = namedtuple("AlertStatus", ["high_alert", "low_alert"])
 ALERT_WINDOW = const(0)
 ALERT_HYSTERESIS = const(1)
+
+# Conversion Averaging Mode
+AVERAGE_1X = const(0b00)
+AVERAGE_8X = const(0b01)
+AVERAGE_32X = const(0b10)
+AVERAGE_64X = const(0b11)
 
 
 class CBits:
@@ -198,6 +204,7 @@ class TMP117:
     _data_ready = CBits(1, _CONFIGURATION, 13, 2, False)
     _mode = CBits(2, _CONFIGURATION, 10, 2, False)
     _soft_reset = CBits(1, _CONFIGURATION, 1, 2, False)
+
     _conversion_averaging_mode = CBits(2, _CONFIGURATION, 5, 2, False)
     _conversion_cycle_bit = CBits(3, _CONFIGURATION, 7, 2, False)
     _raw_alert_mode = CBits(1, _CONFIGURATION, 4, 2, False)
@@ -224,7 +231,7 @@ class TMP117:
                 self._conversion_cycle_bit
             ]
         )
-        self._mode = _CONTINUOUS_CONVERSION_MODE
+        self._mode = CONTINUOUS_CONVERSION_MODE
         while not self._data_ready:
             time.sleep(0.001)
         self._read_temperature()
@@ -354,14 +361,104 @@ class TMP117:
 
     @alert_mode.setter
     def alert_mode(self, value):
-        """The alert_mode of the sensor
+        """The alert_mode of the sensor. Could have the following values:
 
-        Could have the following values:
+        +----------------------------------------+-------------------------+
+        | Mode                                   | Value                   |
+        +========================================+=========================+
+        | :py:const:`tmp117.ALERT_WINDOW`        | :py:const:`0b0`         |
+        +----------------------------------------+-------------------------+
+        | :py:const:`tmp117.ALERT_HYSTERESIS`    | :py:const:`0b1`         |
+        +----------------------------------------+-------------------------+
 
-        * ALERT_WINDOW
-        * ALERT_HYSTERESIS
 
         """
         if value not in [0, 1]:
             raise ValueError("alert_mode must be an 0 or 1")
         self._raw_alert_mode = value
+
+    @property
+    def averaging_measurements(self):
+        """Users can configure the device to report the average of multiple temperature
+        conversions with the AVG[1:0] bits to reduce noise in the conversion results.
+        When the TMP117 is configured to perform averaging with AVG set to 01, the device executes
+        the configured number of conversions to eight. The device accumulates those conversion
+        results and reports the average of all the collected results at the end of the process.
+
+        +----------------------------------------+-------------------------+
+        | Mode                                   | Value                   |
+        +========================================+=========================+
+        | :py:const:`TMP117.AVERAGE_1X`          | :py:const:`0b00`        |
+        +----------------------------------------+-------------------------+
+        | :py:const:`TMP117.AVERAGE_8X`          | :py:const:`0b01`        |
+        +----------------------------------------+-------------------------+
+        | :py:const:`TMP117.AVERAGE_32X`         | :py:const:`0b10`        |
+        +----------------------------------------+-------------------------+
+        | :py:const:`TMP117.AVERAGE_64X`         | :py:const:`0b11`        |
+        +----------------------------------------+-------------------------+
+
+
+        .. code-block::python3
+
+            import time
+            from machine import Pin, I2C
+            import tmp117
+
+            i2c = I2C(sda=Pin(8), scl=Pin(9))  # Correct I2C pins for UM FeatherS2
+            tmp = tmp117.TMP117(i2c)
+
+            tmp.averaging_measurements = tmp117.AVERAGE_32X
+            print("Averaging Measuremens: ",tmp.averaging_measurements)
+
+            while True:
+                print("Temperature:", tmp.temperature)
+                time.sleep(1)
+
+        """
+        return self._conversion_averaging_mode
+
+    @averaging_measurements.setter
+    def averaging_measurements(self, value: int):
+        if value not in range(0, 4):
+            raise ValueError("Value must be 0, 1, 2 or 3")
+        self._conversion_averaging_mode = value
+
+    @property
+    def measurement_mode(self):
+        """Sets the measurement mode, specifying the behavior of how often measurements are taken.
+                `measurement_mode` must be one of:
+
+        When we use the sensor in One shot mode, the sensor will take the average_measurement value
+        into account. However, this measure is done with the formula (15.5 ms × average_time), so in
+        normal operation average_time will be 8, therefore time for measure is 124 ms.
+        (See datasheet. 7.3.2 Averaging for more information). If we use 64, time will be 15.5 x 65 = 992 ms,
+        the standby time will decrease, but the measure is still under 1 Hz cycle.
+        (See Fig 7.2 on the datasheet)
+
+        +----------------------------------------+------------------------------------------------------+
+        | Mode                                   | Behavior                                             |
+        +========================================+======================================================+
+        | :py:const:`MEASUREMENTMODE_CONTINUOUS` | Measurements are made at the interval determined by  |
+        |                                        | `averaging_measurements` and measurement dealy.      |
+        |                                        | `temperature` returns the most recent measurement    |
+        +----------------------------------------+------------------------------------------------------+
+        | :py:const:`MEASUREMENTMODE_ONE_SHOT`   | Take a single measurement with the current number of |
+        |                                        | `averaging_measurements` and switch to               |
+        |                                        | :py:const:`SHUTDOWN` when finished.                  |
+        |                                        | `temperature` will return the new measurement until  |
+        |                                        | `measurement_mode` is set to :py:const:`CONTINUOUS`  |
+        |                                        | or :py:const:`ONE_SHOT` is                           |
+        |                                        | set again.                                           |
+        +----------------------------------------+------------------------------------------------------+
+        | :py:const:`MEASUREMENTMODE_SHUTDOWN`   | The sensor is put into a low power state and no new  |
+        |                                        | measurements are taken.                              |
+        |                                        | `temperature` will return the last measurement until |
+        |                                        | a new `measurement_mode` is selected.                |
+        +----------------------------------------+------------------------------------------------------+
+
+        """
+        return self._mode
+
+    @measurement_mode.setter
+    def measurement_mode(self, value: int) -> None:
+        self._mode = value

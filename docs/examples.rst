@@ -24,3 +24,12 @@ Example illustrating the Alert mode functionality
 .. literalinclude:: ../examples/tmp117_alert_mode.py
     :caption: examples/tmp117_alert_mode.py
     :linenos:
+
+Temperature Averaging Setting
+------------------------------
+
+Example illustrating the Averaging measurement setting
+
+.. literalinclude:: ../examples/tmp117_averaging_measurements.py
+    :caption: examples/tmp117_averaging_measurements.py
+    :linenos:
