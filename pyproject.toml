@@ -20,14 +20,10 @@ authors = [
 ]
 urls = {Homepage = "https://github.com/jposada202020/micropython_TMP117"}
 keywords = [
-    "adafruit",
-    "blinka",
-    "micropython",
     "micropython",
     "tmp117",
     "temperature",
     "sensor",
-    "micropython",
 ]
 license = {text = "MIT"}
 classifiers = [
