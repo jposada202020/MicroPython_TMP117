@@ -234,16 +234,13 @@ class TMP117:
         self._mode = CONTINUOUS_CONVERSION_MODE
         while not self._data_ready:
             time.sleep(0.001)
-        self._read_temperature()
-
-    def _read_temperature(self):
-        return self._raw_temperature * _TMP117_RESOLUTION
+        self._raw_temperature * _TMP117_RESOLUTION
 
     @property
     def temperature(self):
         """The current measured temperature in Celsius"""
 
-        return self._read_temperature()
+        return self._raw_temperature * _TMP117_RESOLUTION
 
     @property
     def temperature_offset(self):
@@ -355,13 +352,7 @@ class TMP117:
         `False` when the measured temperature goes below `low_limit`. In this mode, the `low_limit`
         property of `alert_status` will not be set.
 
-        The default is :py:const:`ALERT_WINDOW`"""
-
-        return self._raw_alert_mode
-
-    @alert_mode.setter
-    def alert_mode(self, value):
-        """The alert_mode of the sensor. Could have the following values:
+        The default is :py:const:`ALERT_WINDOW`
 
         +----------------------------------------+-------------------------+
         | Mode                                   | Value                   |
@@ -371,10 +362,20 @@ class TMP117:
         | :py:const:`tmp117.ALERT_HYSTERESIS`    | :py:const:`0b1`         |
         +----------------------------------------+-------------------------+
 
-
         """
+
+        alert_modes = {
+            0: "ALERT_WINDOW",
+            1: "ALERT_HYSTERESIS",
+        }
+
+        return alert_modes[self._raw_alert_mode]
+
+    @alert_mode.setter
+    def alert_mode(self, value):
+
         if value not in [0, 1]:
-            raise ValueError("alert_mode must be an 0 or 1")
+            raise ValueError("alert_mode must be set to 0 or 1")
         self._raw_alert_mode = value
 
     @property
@@ -415,12 +416,19 @@ class TMP117:
                 time.sleep(1)
 
         """
-        return self._conversion_averaging_mode
+        average_measure = {
+            0: "AVERAGE_1X",
+            1: "AVERAGE_8X",
+            2: "AVERAGE_32X",
+            3: "AVERAGE_64X",
+        }
+
+        return average_measure[self._conversion_averaging_mode]
 
     @averaging_measurements.setter
     def averaging_measurements(self, value: int):
         if value not in range(0, 4):
-            raise ValueError("Value must be 0, 1, 2 or 3")
+            raise ValueError("Value must be set to 0, 1, 2 or 3")
         self._conversion_averaging_mode = value
 
     @property
@@ -439,7 +447,7 @@ class TMP117:
         | Mode                                   | Behavior                                             |
         +========================================+======================================================+
         | :py:const:`MEASUREMENTMODE_CONTINUOUS` | Measurements are made at the interval determined by  |
-        |                                        | `averaging_measurements` and measurement dealy.      |
+        |                                        | `averaging_measurements`.                            |
         |                                        | `temperature` returns the most recent measurement    |
         +----------------------------------------+------------------------------------------------------+
         | :py:const:`MEASUREMENTMODE_ONE_SHOT`   | Take a single measurement with the current number of |
@@ -457,7 +465,13 @@ class TMP117:
         +----------------------------------------+------------------------------------------------------+
 
         """
-        return self._mode
+
+        sensor_modes = {
+            0: "CONTINUOUS_CONVERSION_MODE",
+            1: "SHUTDOWN_MODE",
+            3: "ONE_SHOT_MODE",
+        }
+        return sensor_modes[self._mode]
 
     @measurement_mode.setter
     def measurement_mode(self, value: int) -> None:
