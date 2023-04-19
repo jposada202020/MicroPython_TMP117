@@ -26,11 +26,6 @@ from collections import namedtuple
 from micropython import const
 from micropython_tmp117.i2c_helpers import CBits, RegisterStruct
 
-try:
-    import struct
-except ImportError:
-    import ustruct as struct
-
 
 __version__ = "0.0.0+auto.0"
 __repo__ = "https://github.com/jposada202020/TMP117.git"
