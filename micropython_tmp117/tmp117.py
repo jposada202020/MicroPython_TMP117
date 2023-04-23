@@ -28,7 +28,7 @@ from micropython_tmp117.i2c_helpers import CBits, RegisterStruct
 
 
 __version__ = "0.0.0+auto.0"
-__repo__ = "https://github.com/jposada202020/TMP117.git"
+__repo__ = "https://github.com/jposada202020/MicroPython_TMP117.git"
 
 
 _REG_WHOAMI = const(0x0F)
@@ -135,7 +135,7 @@ class TMP117:
         self._mode = CONTINUOUS_CONVERSION_MODE
         while not self._data_ready:
             time.sleep(0.001)
-        self._raw_temperature * _TMP117_RESOLUTION
+        _ = self._raw_temperature * _TMP117_RESOLUTION
 
     @property
     def temperature(self):
