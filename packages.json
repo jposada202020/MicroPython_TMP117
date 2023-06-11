@@ -1,0 +1,8 @@
+{
+  "urls": [
+    ["micropython_tmp117/tmp117.py", "github:jposada202020/MicroPython_TMP117/micropython_tmp117/tmp117.py"],
+    ["micropython_tmp117/i2c_helpers.py", "github:jposada202020/MicroPython_TMP117/micropython_tmp117/i2c_helpers.py"],
+    ["micropython_tmp117/__init__.py", "github:jposada202020/MicroPython_TMP117/micropython_tmp117/__init__.py"]
+  ],
+  "version": "0.1"
+}

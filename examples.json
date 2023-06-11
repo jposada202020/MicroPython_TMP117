@@ -1,0 +1,9 @@
+{
+  "urls": [
+    ["micropython_tmp117/examples/tmp177_temperature_offset.py", "github:jposada202020/MicroPython_TMP117/examples/tmp177_temperature_offset.py"],
+    ["micropython_tmp117/examples/tmp117_alert_mode.py", "github:jposada202020/MicroPython_TMP117/examples/tmp117_alert_mode.py"],
+    ["micropython_tmp117/examples/tmp117_averaging_measurements.py", "github:jposada202020/MicroPython_TMP117/examples/tmp117_averaging_measurements.py"],
+    ["micropython_tmp117/examples/tmp117_simpletest.py", "github:jposada202020/MicroPython_TMP117/examples/tmp117_simpletest.py"]
+  ],
+  "version": "0.1"
+}
