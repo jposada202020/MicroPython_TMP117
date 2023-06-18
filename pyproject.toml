@@ -37,7 +37,7 @@ classifiers = [
 dynamic = ["dependencies", "optional-dependencies"]
 
 [tool.setuptools]
-py-modules = ["tmp117"]
+packages = ["micropython_tmp117"]
 
 [tool.setuptools.dynamic]
 dependencies = {file = ["requirements.txt"]}

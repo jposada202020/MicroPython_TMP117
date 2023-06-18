@@ -72,7 +72,7 @@ class TMP117:
     .. code-block:: python
 
         from machine import Pin, I2C
-        import micropython_tmp117.tmp117 as tmp117
+        import micropython_tmp117 import tmp117
 
     Once this is done you can define your `machine.I2C` object and define your sensor object
 
