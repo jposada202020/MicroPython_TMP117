@@ -2,7 +2,7 @@
 
 import time
 from machine import Pin, I2C
-import micropython_tmp117.tmp117 as tmp117
+from micropython_tmp117 import tmp117
 
 i2c = I2C(sda=Pin(8), scl=Pin(9))  # Correct I2C pins for UM FeatherS2
 tmp = tmp117.TMP117(i2c)
@@ -16,7 +16,7 @@ print("Low limit", tmp.low_limit)
 
 
 while True:
-    print("Temperature: %.2f degrees C" % tmp.temperature)
+    print("Temperature: {:.2f} C".format(tmp.temperature))
     alert_status = tmp.alert_status
     if alert_status.high_alert:
         print("Temperature above high set limit!")

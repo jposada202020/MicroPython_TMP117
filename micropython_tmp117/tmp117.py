@@ -19,7 +19,7 @@ This library depends on Micropython
 
 """
 
-# pylint: disable=too-many-arguments, line-too-long
+# pylint: disable=line-too-long
 
 import time
 from collections import namedtuple
@@ -288,13 +288,13 @@ class TMP117:
         +----------------------------------------+-------------------------+
         | Mode                                   | Value                   |
         +========================================+=========================+
-        | :py:const:`TMP117.AVERAGE_1X`          | :py:const:`0b00`        |
+        | :py:const:`tmp117.AVERAGE_1X`          | :py:const:`0b00`        |
         +----------------------------------------+-------------------------+
-        | :py:const:`TMP117.AVERAGE_8X`          | :py:const:`0b01`        |
+        | :py:const:`tmp117.AVERAGE_8X`          | :py:const:`0b01`        |
         +----------------------------------------+-------------------------+
-        | :py:const:`TMP117.AVERAGE_32X`         | :py:const:`0b10`        |
+        | :py:const:`tmp117.AVERAGE_32X`         | :py:const:`0b10`        |
         +----------------------------------------+-------------------------+
-        | :py:const:`TMP117.AVERAGE_64X`         | :py:const:`0b11`        |
+        | :py:const:`tmp117.AVERAGE_64X`         | :py:const:`0b11`        |
         +----------------------------------------+-------------------------+
 
 
@@ -341,26 +341,26 @@ class TMP117:
         the standby time will decrease, but the measure is still under 1 Hz cycle.
         (See Fig 7.2 on the datasheet)
 
-        +----------------------------------------+------------------------------------------------------+
-        | Mode                                   | Behavior                                             |
-        +========================================+======================================================+
-        | :py:const:`MEASUREMENTMODE_CONTINUOUS` | Measurements are made at the interval determined by  |
-        |                                        | `averaging_measurements`.                            |
-        |                                        | `temperature` returns the most recent measurement    |
-        +----------------------------------------+------------------------------------------------------+
-        | :py:const:`MEASUREMENTMODE_ONE_SHOT`   | Take a single measurement with the current number of |
-        |                                        | `averaging_measurements` and switch to               |
-        |                                        | :py:const:`SHUTDOWN` when finished.                  |
-        |                                        | `temperature` will return the new measurement until  |
-        |                                        | `measurement_mode` is set to :py:const:`CONTINUOUS`  |
-        |                                        | or :py:const:`ONE_SHOT` is                           |
-        |                                        | set again.                                           |
-        +----------------------------------------+------------------------------------------------------+
-        | :py:const:`MEASUREMENTMODE_SHUTDOWN`   | The sensor is put into a low power state and no new  |
-        |                                        | measurements are taken.                              |
-        |                                        | `temperature` will return the last measurement until |
-        |                                        | a new `measurement_mode` is selected.                |
-        +----------------------------------------+------------------------------------------------------+
+        +-----------------------------------------------+------------------------------------------------------+
+        | Mode                                          | Behavior                                             |
+        +===============================================+======================================================+
+        | :py:const:`tmp117.CONTINUOUS_CONVERSION_MODE` | Measurements are made at the interval determined by  |
+        |                                               | `averaging_measurements`.                            |
+        |                                               | `temperature` returns the most recent measurement    |
+        +-----------------------------------------------+------------------------------------------------------+
+        | :py:const:`tmp117.SHUTDOWN_MODE`              | Take a single measurement with the current number of |
+        |                                               | `averaging_measurements` and switch to               |
+        |                                               | :py:const:`SHUTDOWN` when finished.                  |
+        |                                               | `temperature` will return the new measurement until  |
+        |                                               | `measurement_mode` is set to :py:const:`CONTINUOUS`  |
+        |                                               | or :py:const:`ONE_SHOT` is                           |
+        |                                               | set again.                                           |
+        +-----------------------------------------------+------------------------------------------------------+
+        | :py:const:`tmp117.ONE_SHOT_MODE`              | The sensor is put into a low power state and no new  |
+        |                                               | measurements are taken.                              |
+        |                                               | `temperature` will return the last measurement until |
+        |                                               | a new `measurement_mode` is selected.                |
+        +-----------------------------------------------+------------------------------------------------------+
 
         """
 

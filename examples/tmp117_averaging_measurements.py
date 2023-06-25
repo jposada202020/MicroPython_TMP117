@@ -2,7 +2,7 @@
 
 import time
 from machine import Pin, I2C
-import micropython_tmp117.tmp117 as tmp117
+from micropython_tmp117 import tmp117
 
 i2c = I2C(sda=Pin(8), scl=Pin(9))  # Correct I2C pins for UM FeatherS2
 tmp = tmp117.TMP117(i2c)
@@ -11,7 +11,7 @@ tmp.averaging_measurements = tmp117.AVERAGE_64X
 print("Averaging Measuremens:  ", tmp.averaging_measurements)
 
 while True:
-    print("Single measurement: %.2f C" % tmp.temperature)
+    print("Single measurement: {:.2f} C".format(tmp.temperature))
     for i in range(10):
         print("One Shot Measurement mode: ", tmp.measurement_mode)
         print("Temperature: ", tmp.temperature)
