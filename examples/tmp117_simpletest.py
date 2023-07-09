@@ -7,8 +7,7 @@ from micropython_tmp117 import tmp117
 i2c = I2C(sda=Pin(8), scl=Pin(9))  # Correct I2C pins for UM FeatherS2
 tmp = tmp117.TMP117(i2c)
 
-for _ in range(3):
-    temp = tmp.temperature
-    print(f"Temperature: {temp:.2f} C")
+while True:
+    print(f"Temperature: {tmp.temperature:.2f}°C")
     print("----------")
     time.sleep(1)

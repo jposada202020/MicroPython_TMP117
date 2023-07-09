@@ -53,6 +53,7 @@ AVERAGE_1X = const(0b00)
 AVERAGE_8X = const(0b01)
 AVERAGE_32X = const(0b10)
 AVERAGE_64X = const(0b11)
+averaging_measurements_values = (AVERAGE_1X, AVERAGE_8X, AVERAGE_32X, AVERAGE_64X)
 
 
 class TMP117:
@@ -316,8 +317,8 @@ class TMP117:
 
     @averaging_measurements.setter
     def averaging_measurements(self, value: int) -> None:
-        if value not in range(0, 4):
-            raise ValueError("Value must be set to 0, 1, 2 or 3")
+        if value not in averaging_measurements_values:
+            raise ValueError("Value must be a valid averaging_measurements setting")
         self._conversion_averaging_mode = value
 
     @property

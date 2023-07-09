@@ -16,7 +16,7 @@ print("Low limit", tmp.low_limit)
 
 
 while True:
-    print(f"Alert status: {tmp.alert_status:.2f}")
+    print(f"Alert status: {tmp.alert_status:.2f}°C")
     alert_status = tmp.alert_status
     if alert_status.high_alert:
         print("Temperature above high set limit!")

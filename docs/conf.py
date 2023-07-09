@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 # SPDX-FileCopyrightText: 2017 Scott Shawcroft, written for Adafruit Industries
 #
 # SPDX-License-Identifier: MIT
@@ -77,18 +75,8 @@ release = "1.0"
 html_baseurl = "https://micropython-tmp117.readthedocs.io/"
 language = "en"
 
-# List of patterns, relative to source directory, that match files and
-# directories to ignore when looking for source files.
-# This patterns also effect to html_static_path and html_extra_path
 exclude_patterns = ["_build", "Thumbs.db", ".DS_Store", ".env", "requirements.txt"]
-
-# The reST default role (used for this markup: `text`) to use for all
-# documents.
-#
 default_role = "any"
-
-# If true, '()' will be appended to :func: etc. cross-reference text.
-#
 add_function_parentheses = True
 
 rst_prolog = """
@@ -220,32 +208,6 @@ html_favicon = "_static/favicon.ico"
 html_logo = "_static/Logo.png"
 # Output file base name for HTML help builder.
 htmlhelp_basename = "Micropython_Tmp117_Librarydoc"
-
-# -- Options for LaTeX output ---------------------------------------------
-
-latex_elements = {
-    # The paper size ('letterpaper' or 'a4paper').
-    # 'papersize': 'letterpaper',
-    # The font size ('10pt', '11pt' or '12pt').
-    # 'pointsize': '10pt',
-    # Additional stuff for the LaTeX preamble.
-    # 'preamble': '',
-    # Latex figure (float) alignment
-    # 'figure_align': 'htbp',
-}
-
-# Grouping the document tree into LaTeX files. List of tuples
-# (source start file, target name, title,
-#  author, documentclass [howto, manual, or own class]).
-latex_documents = [
-    (
-        master_doc,
-        "Micropython_TMP117_Library.tex",
-        "Micropython TMP117 Library Documentation",
-        author,
-        "manual",
-    ),
-]
 
 # -- Options for manual page output ---------------------------------------
 
