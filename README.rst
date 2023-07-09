@@ -25,10 +25,6 @@ Introduction
 
 MicroPython Driver for the TMP117 temperature sensor
 
-Register reding based on
-https://github.com/adafruit/Adafruit_CircuitPython_Register
-
-
 Installing with mip
 ====================
 
