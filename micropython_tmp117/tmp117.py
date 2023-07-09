@@ -116,7 +116,7 @@ class TMP117:
     _avg_0 = {0: 0.0155, 1: 0.125, 2: 0.25, 3: 0.5, 4: 1, 5: 4, 6: 8, 7: 16}
     _averaging_modes = {0: _avg_0, 1: _avg_1, 2: _avg_2, 3: _avg_3}
 
-    def __init__(self, i2c, address=0x48):
+    def __init__(self, i2c, address=0x48) -> None:
         self._i2c = i2c
         self._address = address
         self._valide_range = range(-256, 255)
@@ -138,13 +138,13 @@ class TMP117:
         _ = self._raw_temperature * _TMP117_RESOLUTION
 
     @property
-    def temperature(self):
+    def temperature(self) -> float:
         """The current measured temperature in Celsius"""
 
         return self._raw_temperature * _TMP117_RESOLUTION
 
     @property
-    def temperature_offset(self):
+    def temperature_offset(self) -> float:
         """User defined temperature offset to be added to measurements from `temperature`.
         In order the see the new change in the temperature we need for the data to be ready.
         There is a time delay calculated according to current configuration.
@@ -165,8 +165,7 @@ class TMP117:
         return self._raw_temperature_offset * _TMP117_RESOLUTION
 
     @temperature_offset.setter
-    def temperature_offset(self, value: float):
-
+    def temperature_offset(self, value: float) -> None:
         self._raw_temperature_offset = self.validate_value(value)
         time.sleep(
             self._averaging_modes[self._conversion_averaging_mode][
@@ -175,28 +174,30 @@ class TMP117:
         )
 
     @property
-    def high_limit(self):
+    def high_limit(self) -> float:
         """The high temperature limit in Celsius. When the measured temperature exceeds this
-        value, the `high_alert` attribute of the `alert_status` property will be True."""
+        value, the `high_alert` attribute of the `alert_status` property will be True.
+        """
 
         return self._raw_high_limit * _TMP117_RESOLUTION
 
     @high_limit.setter
-    def high_limit(self, value: float):
+    def high_limit(self, value: float) -> None:
         self._raw_high_limit = self.validate_value(value)
 
     @property
-    def low_limit(self):
+    def low_limit(self) -> float:
         """The low  temperature limit in Celsius. When the measured temperature goes below
-        this value, the `low_alert` attribute of the `alert_status` property will be True."""
+        this value, the `low_alert` attribute of the `alert_status` property will be True.
+        """
 
         return self._raw_low_limit * _TMP117_RESOLUTION
 
     @low_limit.setter
-    def low_limit(self, value: float):
+    def low_limit(self, value: float) -> None:
         self._raw_low_limit = self.validate_value(value)
 
-    def validate_value(self, value):
+    def validate_value(self, value: int) -> int:
         """Validates for values to be in the range of :const:`-256` and :const:`255`,
         then return the value divided by the :const:`_TMP117_RESOLUTION`
         """
@@ -205,7 +206,7 @@ class TMP117:
         return int(value / _TMP117_RESOLUTION)
 
     @property
-    def alert_status(self):
+    def alert_status(self) -> AlertStatus:
         """The current triggered status of the high and low temperature alerts as a AlertStatus
         named tuple with attributes for the triggered status of each alert.
 
@@ -240,7 +241,7 @@ class TMP117:
         return AlertStatus(high_alert=self._high_alert, low_alert=self._low_alert)
 
     @property
-    def alert_mode(self):
+    def alert_mode(self) -> str:
         """Sets the behavior of the `low_limit`, `high_limit`, and `alert_status` properties.
 
         When set to :py:const:`ALERT_WINDOW`, the `high_limit` property will unset when the
@@ -263,22 +264,17 @@ class TMP117:
 
         """
 
-        alert_modes = {
-            0: "ALERT_WINDOW",
-            1: "ALERT_HYSTERESIS",
-        }
-
-        return alert_modes[self._raw_alert_mode]
+        values = ("ALERT_WINDOW", "ALERT_HYSTERESIS")
+        return values[self._raw_alert_mode]
 
     @alert_mode.setter
-    def alert_mode(self, value):
-
+    def alert_mode(self, value: int) -> None:
         if value not in [0, 1]:
             raise ValueError("alert_mode must be set to 0 or 1")
         self._raw_alert_mode = value
 
     @property
-    def averaging_measurements(self):
+    def averaging_measurements(self) -> str:
         """Users can configure the device to report the average of multiple temperature
         conversions with the AVG[1:0] bits to reduce noise in the conversion results.
         When the TMP117 is configured to perform averaging with AVG set to 01, the device executes
@@ -314,23 +310,18 @@ class TMP117:
                 time.sleep(1)
 
         """
-        average_measure = {
-            0: "AVERAGE_1X",
-            1: "AVERAGE_8X",
-            2: "AVERAGE_32X",
-            3: "AVERAGE_64X",
-        }
 
-        return average_measure[self._conversion_averaging_mode]
+        values = ("AVERAGE_1X", "AVERAGE_8X", "AVERAGE_32X", "AVERAGE_64X")
+        return values[self._conversion_averaging_mode]
 
     @averaging_measurements.setter
-    def averaging_measurements(self, value: int):
+    def averaging_measurements(self, value: int) -> None:
         if value not in range(0, 4):
             raise ValueError("Value must be set to 0, 1, 2 or 3")
         self._conversion_averaging_mode = value
 
     @property
-    def measurement_mode(self):
+    def measurement_mode(self) -> str:
         """Sets the measurement mode, specifying the behavior of how often measurements are taken.
                 `measurement_mode` must be one of:
 
