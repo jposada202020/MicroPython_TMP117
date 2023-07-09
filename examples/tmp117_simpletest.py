@@ -9,6 +9,6 @@ tmp = tmp117.TMP117(i2c)
 
 for _ in range(3):
     temp = tmp.temperature
-    print("Temperature: ", temp)
+    print(f"Temperature: {temp:.2f} C")
     print("----------")
     time.sleep(1)

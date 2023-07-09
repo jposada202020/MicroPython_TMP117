@@ -326,7 +326,7 @@ class TMP117:
                 `measurement_mode` must be one of:
 
         When we use the sensor in One shot mode, the sensor will take the average_measurement value
-        into account. However, this measure is done with the formula (15.5 ms × average_time), so in
+        into account. However, this measure is done with the formula (15.5 ms x average_time), so in
         normal operation average_time will be 8, therefore time for measure is 124 ms.
         (See datasheet. 7.3.2 Averaging for more information). If we use 64, time will be 15.5 x 65 = 992 ms,
         the standby time will decrease, but the measure is still under 1 Hz cycle.
