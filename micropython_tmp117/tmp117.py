@@ -140,7 +140,12 @@ class TMP117:
 
     @property
     def temperature(self) -> float:
-        """The current measured temperature in Celsius"""
+        """
+        The current measured temperature in Celsius
+        Following a reset, the temperature reads -256 °C until the first conversion,
+        including averaging, is complete. See the Power Up section in the datasheet
+        for more information.
+        """
 
         return self._raw_temperature * _TMP117_RESOLUTION
 
@@ -149,6 +154,11 @@ class TMP117:
         """User defined temperature offset to be added to measurements from `temperature`.
         In order the see the new change in the temperature we need for the data to be ready.
         There is a time delay calculated according to current configuration.
+        This is used as a user-defined temperature offset register during system calibration.
+        The offset will be added to the temperature result after linearization. It has a same
+        resolution of 7.8125 m°C and same range of ±256 °C as the temperature result register.
+        If the added result is out of boundary, then the temperature result will show as the
+        maximum or minimum value.
 
         .. code-block::python
 
@@ -178,6 +188,9 @@ class TMP117:
     def high_limit(self) -> float:
         """The high temperature limit in Celsius. When the measured temperature exceeds this
         value, the `high_alert` attribute of the `alert_status` property will be True.
+        The range is ±256 °C. Following power-up or a general-call reset, the high-limit
+        register is loaded with the stored value from the EEPROM. The factory default reset
+        value is 192 °C (0x6000)
         """
 
         return self._raw_high_limit * _TMP117_RESOLUTION
@@ -190,6 +203,9 @@ class TMP117:
     def low_limit(self) -> float:
         """The low  temperature limit in Celsius. When the measured temperature goes below
         this value, the `low_alert` attribute of the `alert_status` property will be True.
+        The range is ±256 °C. Following power-up or a general-call reset, the low-limit
+        register is loaded with the stored value from the EEPROM. The factory default reset
+        value is -256 °C (0x8000)
         """
 
         return self._raw_low_limit * _TMP117_RESOLUTION
@@ -276,11 +292,15 @@ class TMP117:
 
     @property
     def averaging_measurements(self) -> str:
-        """Users can configure the device to report the average of multiple temperature
-        conversions with the AVG[1:0] bits to reduce noise in the conversion results.
-        When the TMP117 is configured to perform averaging with AVG set to 01, the device executes
-        the configured number of conversions to eight. The device accumulates those conversion
-        results and reports the average of all the collected results at the end of the process.
+        """
+        Users can configure the device to report the average of multiple temperature
+        conversions with the :attr:`averaging_measurements` to reduce noise in the conversion
+        results.
+        When the TMP117 is configured to perform averaging with :attr:`averaging_measurements`
+        set to :attr:`AVERAGE_8X`, the device executes the configured number of conversions to eight.
+        The device accumulates those conversion results and reports the average of all the
+        collected results at the end of the process.
+        The average is an accumulated average and not a running average.
 
         +----------------------------------------+-------------------------+
         | Mode                                   | Value                   |

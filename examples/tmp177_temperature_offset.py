@@ -11,6 +11,6 @@ print("Temperature without offset: ", tmp.temperature)
 tmp.temperature_offset = 10.0
 
 while True:
-    print(f"Temperature offset: {tmp.temperature:.2f} C")
+    print(f"Temperature offset: {tmp.temperature:.2f}°C")
     print()
     time.sleep(1)
