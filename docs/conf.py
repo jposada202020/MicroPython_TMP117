@@ -208,34 +208,3 @@ html_favicon = "_static/favicon.ico"
 html_logo = "_static/Logo.png"
 # Output file base name for HTML help builder.
 htmlhelp_basename = "Micropython_Tmp117_Librarydoc"
-
-# -- Options for manual page output ---------------------------------------
-
-# One entry per manual page. List of tuples
-# (source start file, name, description, authors, manual section).
-man_pages = [
-    (
-        master_doc,
-        "Micropython_TMP117_Library",
-        "Micropython TMP117 Library Documentation",
-        [author],
-        1,
-    ),
-]
-
-# -- Options for Texinfo output -------------------------------------------
-
-# Grouping the document tree into Texinfo files. List of tuples
-# (source start file, target name, title, author,
-#  dir menu entry, description, category)
-texinfo_documents = [
-    (
-        master_doc,
-        "Micropython_TMP117_Library",
-        "Micropython TMP117 Library Documentation",
-        author,
-        "micropython_TMP117_Library",
-        "One line description of project.",
-        "Miscellaneous",
-    ),
-]
